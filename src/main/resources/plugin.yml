@@ -1,0 +1,4 @@
+name: HTGEconomyAPI
+version: '1.0-SNAPSHOT'
+main: pl.htgmc.hTGEconomyAPI.Main
+api-version: '1.20'
