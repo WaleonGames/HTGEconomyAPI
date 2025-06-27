@@ -23,7 +23,15 @@ public class EconomyAPI {
         CoinStorage.removeCoins(uuid, amount);
     }
 
+    public static void punish(UUID uuid, double amount) {
+        CoinStorage.punishCoins(uuid, amount);
+    }
+
     public static boolean has(UUID uuid, double amount) {
         return get(uuid) >= amount;
+    }
+
+    public static void save() {
+        CoinStorage.save();
     }
 }

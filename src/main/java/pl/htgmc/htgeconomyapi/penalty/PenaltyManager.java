@@ -28,7 +28,8 @@ public class PenaltyManager {
     }
 
     public static void apply(UUID uuid, double amount, String reason) {
-        EconomyAPI.remove(uuid, amount);
+        EconomyAPI.punish(uuid, amount);
+        EconomyAPI.save();
 
         OfflinePlayer target = Bukkit.getOfflinePlayer(uuid);
         String name = target.getName() != null ? target.getName() : uuid.toString();

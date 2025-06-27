@@ -3,3 +3,8 @@ version: '${project.version}'
 main: pl.htgmc.htgeconomyapi.HTGEconomyAPI
 api-version: '1.21'
 load: STARTUP
+commands:
+  coins:
+    description: Sprawdź lub zarządzaj monetami gracza
+    usage: /coins [gracz] [dodaj|usun|ustaw|kara] [ilość] [powod - kara]
+    permission: htg.coins

@@ -6,7 +6,7 @@
 
   <groupId>pl.htgmc</groupId>
   <artifactId>HTGEconomyAPI</artifactId>
-  <version>0.0.1-alfa</version>
+  <version>0.0.2-alfa</version>
   <packaging>jar</packaging>
 
   <name>HTGEconomyAPI</name>
@@ -23,8 +23,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
+          <source>14</source>
+          <target>14</target>
         </configuration>
       </plugin>
       <plugin>
