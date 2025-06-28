@@ -77,10 +77,6 @@ Plugin automatycznie generuje wykres (linia, kolory, tło ciemne) i wysyła co 6
 
 ## 📌 Przyszłe funkcje
 
-- System nagród za aktywność
-- Zaawansowane zabezpieczenia systemu kar
-- Integracja z bazą danych (MySQL)
-- Surowce wpływające na inflację serwera
 - Sezonowe bonusy (Złoty Tydzień, Tani Tydzień itp.)
 
 ---
