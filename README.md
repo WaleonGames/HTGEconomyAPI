@@ -24,11 +24,22 @@
 
 ## 🔌 Integracje
 
-- **LuckPerms** – rozkład rang i wpływ rang na ekonomię
-- **PlaceholderAPI** – `%htgcoins_coins%`, gotowe rozszerzenie
-- **QuickChart.io** – wykresy ekonomiczne wysyłane na Discord Webhook
-- **HTGSklep** – sklep z obsługą coins i dynamicznych cen
-- **HTGSprawdzanie** – zaawansowany system sprawdzania graczy, zintegrowany z systemem kar dla administracji w przypadku braku podania powodu zakończenia sprawdzania.
+- **LuckPerms** – wykorzystywany do analizy rozkładu rang, które wpływają na dynamiczne ceny w ekonomii.  
+- **PlaceholderAPI** – wbudowane rozszerzenie z placeholderem `%htgcoins_coins%`.  
+- **QuickChart.io** – generowanie wykresów ekonomicznych i ich automatyczna wysyłka na Discord Webhook.  
+- **HTGSklep** – system sklepu z obsługą coins oraz dynamicznych cen w oparciu o API ekonomii.  
+- **HTGSprawdzanie** – zaawansowany system sprawdzania graczy, z karami dla administracji za brak podania powodu zakończenia sprawdzania.
+
+---
+
+## 📦 Aktualna wersja API dla pluginów
+
+| Plugin            | Wersja       |
+|-------------------|--------------|
+| **HTGSklep**       | `0.0.4-beta` |
+| **HTGSprawdzanie** | `0.0.3-beta` |
+
+[![](https://jitpack.io/v/WaleonGames/HTGEconomyAPI.svg)](https://jitpack.io/#WaleonGames/HTGEconomyAPI)
 
 ---
 
