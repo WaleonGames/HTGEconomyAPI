@@ -37,7 +37,7 @@
 | Plugin            | Wersja       |
 |-------------------|--------------|
 | **HTGSklep**       | `0.0.4-beta` |
-| **HTGSprawdzanie** | `0.0.3-beta` |
+| **HTGSprawdzanie** | `0.0.4-beta` |
 
 [![](https://jitpack.io/v/WaleonGames/HTGEconomyAPI.svg)](https://jitpack.io/#WaleonGames/HTGEconomyAPI)
 
