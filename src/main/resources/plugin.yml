@@ -2,9 +2,15 @@ name: HTGEconomyAPI
 version: '${project.version}'
 main: pl.htgmc.htgeconomyapi.HTGEconomyAPI
 api-version: '1.21'
-load: STARTUP
+depend:
+  - PlaceholderAPI
+  - LuckPerms
 commands:
   coins:
     description: Sprawdź lub zarządzaj monetami gracza
     usage: /coins [gracz] [dodaj|usun|ustaw|kara] [ilość] [powod - kara]
-    permission: htg.coins
+    permission: htg.coins.admin
+  dynamics:
+    description: Pokazuje statystyki dynamicznej ekonomii
+    usage: /dynamics
+    permission: htg.dynamics.admin

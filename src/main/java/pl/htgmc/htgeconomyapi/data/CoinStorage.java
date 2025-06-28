@@ -82,4 +82,8 @@ public class CoinStorage {
     public static void punishCoins(UUID uuid, double amount) {
         balances.put(uuid, getCoins(uuid) - amount);
     }
+
+    public static Map<UUID, Double> getAllBalances() {
+        return new HashMap<>(balances);
+    }
 }
