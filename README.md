@@ -89,7 +89,6 @@ Plugin automatycznie generuje wykres (linia, kolory, tło ciemne) i wysyła co 6
 
 ## 📌 Przyszłe funkcje
 
-- Transfery między Vault a HTGEconomyAPI oraz innych ekonomicznych pluginów działanie*
 - Sezonowe bonusy (Złoty Tydzień, Tani Tydzień itp.)*
 
 ---
