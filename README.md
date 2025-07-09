@@ -10,7 +10,7 @@
 - Java 17+
 - ✅ [LuckPerms](https://luckperms.net)
 - ✅ [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)
-- (WKRÓTCE) [Vault](#)
+- ✅ [Vault](https://www.spigotmc.org/resources/vault.34315/) (polecane) 1.7.1+
 - ✅ Kompatybilny z Purpur, Paper, Spigot
 
 ---
