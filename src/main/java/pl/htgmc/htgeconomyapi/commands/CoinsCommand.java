@@ -23,7 +23,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("info"))) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara|info] <kwota> <powód>"));
+                    "§a§lEkonomia &cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara|info] <kwota> <powód>"));
             return true;
         }
 
@@ -49,7 +49,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
 
         if (args.length < 4) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>"));
+                    "§a§lEkonomia &cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>"));
             return true;
         }
 
@@ -84,7 +84,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         "&a&lEkonomia &7Ukarano gracza &f" + target.getName() + "&7 kwotą &c-" + amount + " " + tag + "&7. Powód: &f" + reason));}
             default -> sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&cNieznana akcja. Użyj: dodaj | usun | ustaw | kara | info"));
+                    "§a§lEkonomia &cNieznana akcja. Użyj: dodaj | usun | ustaw | kara | info"));
         }
 
         return true;
@@ -95,7 +95,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
             return Double.parseDouble(input);
         } catch (NumberFormatException e) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&cPodana kwota nie jest liczbą."));
+                    "§a§lEkonomia &cPodana kwota nie jest liczbą."));
             throw e;
         }
     }

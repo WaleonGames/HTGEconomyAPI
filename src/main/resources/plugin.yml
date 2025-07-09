@@ -5,6 +5,7 @@ api-version: '1.21'
 depend:
   - PlaceholderAPI
   - LuckPerms
+  - Vault
 commands:
   coins:
     description: Sprawdź lub zarządzaj monetami gracza
@@ -14,3 +15,7 @@ commands:
     description: Pokazuje statystyki dynamicznej ekonomii
     usage: /dynamics
     permission: htg.dynamics.admin
+  transfer:
+    description: Przewalutuj środki lub przelej HTG do innego gracza
+    usage: /transfer <tohtg|tovault|toplayer> <kwota> [nick]
+    permission: htg.transfer

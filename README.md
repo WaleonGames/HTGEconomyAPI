@@ -10,6 +10,7 @@
 - Java 17+
 - ✅ [LuckPerms](https://luckperms.net)
 - ✅ [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)
+- (WKRÓTCE) [Vault](#)
 - ✅ Kompatybilny z Purpur, Paper, Spigot
 
 ---
@@ -88,7 +89,8 @@ Plugin automatycznie generuje wykres (linia, kolory, tło ciemne) i wysyła co 6
 
 ## 📌 Przyszłe funkcje
 
-- Sezonowe bonusy (Złoty Tydzień, Tani Tydzień itp.)
+- Transfery między Vault a HTGEconomyAPI oraz innych ekonomicznych pluginów działanie*
+- Sezonowe bonusy (Złoty Tydzień, Tani Tydzień itp.)*
 
 ---
 
