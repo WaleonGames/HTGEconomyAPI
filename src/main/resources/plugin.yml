@@ -8,14 +8,21 @@ depend:
   - Vault
 commands:
   coins:
-    description: Sprawdź lub zarządzaj monetami gracza
-    usage: /coins [gracz] [dodaj|usun|ustaw|kara] [ilość] [powod - kara]
-    permission: htg.coins.admin
+    description: Sprawdź swoje saldo lub zarządzaj saldem innych
+    usage: /coins lub /coins manager <gracz> [dodaj|usun|ustaw|kara|info] <kwota> <powód>
   dynamics:
     description: Pokazuje statystyki dynamicznej ekonomii
     usage: /dynamics
-    permission: htg.dynamics.admin
+    permission: htgcoins.dynamics
   transfer:
     description: Przewalutuj środki lub przelej HTG do innego gracza
     usage: /transfer <tohtg|tovault|toplayer> <kwota> [nick]
-    permission: htg.transfer
+
+permissions:
+  htgcoins.admin:
+    description: Dostęp do zarządzania monetami innych graczy
+    default: op
+
+  htgcoins.dynamics:
+    description: Dostęp do sprawdzania dynamicznej ekonomi
+    default: op

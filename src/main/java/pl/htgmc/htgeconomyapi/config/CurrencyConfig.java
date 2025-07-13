@@ -1,4 +1,3 @@
-// === pl/htgmc/htgeconomyapi/config/CurrencyConfig.java ===
 package pl.htgmc.htgeconomyapi.config;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -6,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +14,7 @@ public class CurrencyConfig {
     private static final Map<String, String> currencyTags = new HashMap<>();
     private static File file;
     private static FileConfiguration config;
+    private static final DecimalFormat numberFormat = new DecimalFormat("#,##0.00");
 
     public static void load(File pluginFolder) {
         file = new File(pluginFolder, "currencies.yml");
@@ -41,5 +42,14 @@ public class CurrencyConfig {
 
     public static Map<String, String> getAll() {
         return currencyTags;
+    }
+
+    public static String format(String currencyId, double amount) {
+        String tag = getTag(currencyId);
+
+        // Formatowanie: np. 1,234,567.89
+        String formatted = numberFormat.format(amount);
+
+        return formatted + " " + tag;
     }
 }

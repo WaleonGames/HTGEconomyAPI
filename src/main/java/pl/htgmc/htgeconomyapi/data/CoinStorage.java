@@ -3,6 +3,7 @@ package pl.htgmc.htgeconomyapi.data;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import pl.htgmc.htgeconomyapi.config.CurrencyConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,5 +86,10 @@ public class CoinStorage {
 
     public static Map<UUID, Double> getAllBalances() {
         return new HashMap<>(balances);
+    }
+
+    public static String getFormattedCoins(UUID uuid) {
+        double coins = getCoins(uuid);
+        return CurrencyConfig.format("coins", coins);
     }
 }

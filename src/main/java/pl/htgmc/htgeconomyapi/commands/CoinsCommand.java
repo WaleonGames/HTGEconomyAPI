@@ -1,4 +1,3 @@
-// === pl/htgmc/htgeconomyapi/commands/CoinsCommand.java ===
 package pl.htgmc.htgeconomyapi.commands;
 
 import org.bukkit.Bukkit;
@@ -21,72 +20,89 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
         String currency = "coins";
         String tag = CurrencyConfig.getTag(currency);
 
-        if (args.length == 0 || (args.length == 1 && args[0].equalsIgnoreCase("info"))) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "§a§lEkonomia &cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara|info] <kwota> <powód>"));
-            return true;
-        }
+        // /coins – saldo gracza
+        if (args.length == 0) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage("Ta komenda jest tylko dla graczy.");
+                return true;
+            }
 
-        // /coins <nick>
-        if (args.length == 1) {
-            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-            UUID uuid = target.getUniqueId();
+            UUID uuid = player.getUniqueId();
             double balance = EconomyAPI.get(uuid);
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&a&lEkonomia &7Saldo gracza &f" + target.getName() + "&7: &e" + balance + " " + tag));
+            player.sendMessage(ChatColor.GREEN + "💰 Twoje saldo: " + ChatColor.GOLD + balance + " " + tag);
             return true;
         }
 
-        // /coins <nick> info
-        if (args.length == 2 && args[1].equalsIgnoreCase("info")) {
-            OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
+        // /coins manager <nick> ...
+        if (args.length >= 2 && args[0].equalsIgnoreCase("manager")) {
+            if (!sender.hasPermission("htgcoins.admin")) {
+                sender.sendMessage(ChatColor.RED + "⛔ Brak uprawnień: htgcoins.admin");
+                return true;
+            }
+
+            OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
             UUID uuid = target.getUniqueId();
-            double balance = EconomyAPI.get(uuid);
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "&a&lEkonomia &7Saldo gracza &f" + target.getName() + "&7: &e" + balance + " " + tag));
+
+            if (args.length == 3 && args[2].equalsIgnoreCase("info")) {
+                double balance = EconomyAPI.get(uuid);
+                sender.sendMessage(ChatColor.GREEN + "💰 Saldo gracza " + target.getName() + ": " + ChatColor.GOLD + balance + " " + tag);
+                return true;
+            }
+
+            if (args.length < 5) {
+                sender.sendMessage(ChatColor.RED + "⛔ Użycie: /coins manager <nick> [dodaj|usun|ustaw|kara] <kwota> <powód>");
+                return true;
+            }
+
+            String action = args[2].toLowerCase();
+            double amount = parseDouble(args[3], sender);
+            String reason = String.join(" ", Arrays.copyOfRange(args, 4, args.length));
+
+            switch (action) {
+                case "dodaj" -> {
+                    EconomyAPI.add(uuid, amount);
+                    EconomyAPI.save();
+                    sender.sendMessage(ChatColor.GREEN + "✅ Dodano " + amount + " " + tag + " graczowi " + target.getName() + ". Powód: " + reason);
+
+                    if (target.isOnline()) {
+                        ((Player) target).sendMessage(ChatColor.GREEN + "💸 Otrzymałeś +" + amount + " " + tag + ". Powód: " + reason);
+                    }
+                }
+                case "usun" -> {
+                    EconomyAPI.remove(uuid, amount);
+                    EconomyAPI.save();
+                    sender.sendMessage(ChatColor.YELLOW + "➖ Usunięto " + amount + " " + tag + " od gracza " + target.getName() + ". Powód: " + reason);
+
+                    if (target.isOnline()) {
+                        ((Player) target).sendMessage(ChatColor.RED + "💸 Zabrano -" + amount + " " + tag + ". Powód: " + reason);
+                    }
+                }
+                case "ustaw" -> {
+                    EconomyAPI.set(uuid, amount);
+                    EconomyAPI.save();
+                    sender.sendMessage(ChatColor.AQUA + "🔁 Ustawiono saldo gracza " + target.getName() + " na " + amount + " " + tag + ". Powód: " + reason);
+
+                    if (target.isOnline()) {
+                        ((Player) target).sendMessage(ChatColor.AQUA + "💰 Twoje saldo zostało ustawione na " + amount + " " + tag + ". Powód: " + reason);
+                    }
+                }
+                case "kara" -> {
+                    PenaltyManager.apply(uuid, amount, reason);
+                    EconomyAPI.save();
+                    sender.sendMessage(ChatColor.DARK_RED + "⚠️ Ukarano gracza " + target.getName() + " kwotą -" + amount + " " + tag + ". Powód: " + reason);
+
+                    if (target.isOnline()) {
+                        ((Player) target).sendMessage(ChatColor.RED + "❗ Zostałeś ukarany kwotą -" + amount + " " + tag + ". Powód: " + reason);
+                    }
+                }
+                default -> sender.sendMessage(ChatColor.RED + "❓ Nieznana akcja. Użyj: dodaj | usun | ustaw | kara | info");
+            }
+
             return true;
         }
 
-        if (args.length < 4) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "§a§lEkonomia &cUżycie: /coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>"));
-            return true;
-        }
-
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
-        UUID uuid = target.getUniqueId();
-        String action = args[1].toLowerCase();
-        double amount = parseDouble(args[2], sender);
-        String reason = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
-
-        switch (action) {
-            case "dodaj" -> {
-                EconomyAPI.add(uuid, amount);
-                EconomyAPI.save();
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&lEkonomia &7Dodano &e" + amount + " " + tag + " &7graczowi &f" + target.getName() + "&7. Powód: &f" + reason));
-            }
-            case "usun" -> {
-                EconomyAPI.remove(uuid, amount);
-                EconomyAPI.save();
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&lEkonomia &7Usunięto &e" + amount + " " + tag + " &7graczowi &f" + target.getName() + "&7. Powód: &f" + reason));
-            }
-            case "ustaw" -> {
-                EconomyAPI.set(uuid, amount);
-                EconomyAPI.save();
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&lEkonomia &7Ustawiono saldo gracza &f" + target.getName() + " &7na &e" + amount + " " + tag + "&7. Powód: &f" + reason));
-            }
-            case "kara" -> {
-                PenaltyManager.apply(uuid, amount, reason);
-                EconomyAPI.save();
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        "&a&lEkonomia &7Ukarano gracza &f" + target.getName() + "&7 kwotą &c-" + amount + " " + tag + "&7. Powód: &f" + reason));}
-            default -> sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "§a§lEkonomia &cNieznana akcja. Użyj: dodaj | usun | ustaw | kara | info"));
-        }
-
+        // ✋ Odmowa innym graczom wpisującym /coins <nick>
+        sender.sendMessage(ChatColor.RED + "⛔ Ta komenda nie istnieje. Użyj /coins lub /coins manager <nick>");
         return true;
     }
 
@@ -94,8 +110,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
         try {
             return Double.parseDouble(input);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                    "§a§lEkonomia &cPodana kwota nie jest liczbą."));
+            sender.sendMessage(ChatColor.RED + "⛔ Podana kwota nie jest liczbą.");
             throw e;
         }
     }
@@ -105,17 +120,22 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
+            if ("manager".startsWith(args[0].toLowerCase())) {
+                completions.add("manager");
+            }
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("manager")) {
             for (Player p : Bukkit.getOnlinePlayers()) {
-                String name = p.getName();
-                if (name.toLowerCase().startsWith(args[0].toLowerCase())) {
-                    completions.add(name);
+                if (p.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                    completions.add(p.getName());
                 }
             }
         }
 
-        if (args.length == 2) {
+        if (args.length == 3 && args[0].equalsIgnoreCase("manager")) {
             for (String sub : SUBCOMMANDS) {
-                if (sub.startsWith(args[1].toLowerCase())) {
+                if (sub.startsWith(args[2].toLowerCase())) {
                     completions.add(sub);
                 }
             }

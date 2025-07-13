@@ -107,7 +107,6 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
 
         }
 
-        // === PRZELEW: toplayer ===
         else if (direction.equals("toplayer")) {
             if (args.length != 3) {
                 player.sendMessage("§a§lEkonomia §7Użycie: /transfer toplayer <kwota> <nick>");
@@ -139,23 +138,24 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
-            if (target == null || !target.hasPlayedBefore()) {
-                player.sendMessage("§a§lEkonomia §cNie znaleziono gracza: " + targetName);
+            Player targetPlayer = Bukkit.getPlayerExact(targetName);
+            if (targetPlayer == null || !targetPlayer.isOnline()) {
+                player.sendMessage("§a§lEkonomia §cGracz '" + targetName + "' musi być online, aby wykonać przelew.");
                 return true;
             }
 
-            UUID receiver = target.getUniqueId();
+            UUID receiverId = targetPlayer.getUniqueId();
 
             CoinStorage.removeCoins(senderId, amount);
-            CoinStorage.addCoins(receiver, amount);
+            CoinStorage.addCoins(receiverId, amount);
             CoinStorage.save();
 
-            player.sendMessage("§a§lEkonomia §7Przesłałeś §e" + amount + " HTG §7do §a" + targetName);
-            if (target.isOnline()) {
-                ((Player) target).sendMessage("§c§lEkonomia §7Otrzymałeś §e" + amount +
-                        " HTG §7od §a" + player.getName());
-            }
+            player.sendMessage("§a§lEkonomia §7Przesłałeś §e" + amount + " HTG §7do §a" + targetPlayer.getName());
+            targetPlayer.sendMessage("§a§lEkonomia §7Otrzymałeś §e" + amount +
+                    " HTG §7od §a" + player.getName());
+
+            Bukkit.getLogger().info("[Ekonomia] Gracz " + player.getName() + " przelał " +
+                    amount + " HTG do " + targetPlayer.getName() + ".");
 
             return true;
         }

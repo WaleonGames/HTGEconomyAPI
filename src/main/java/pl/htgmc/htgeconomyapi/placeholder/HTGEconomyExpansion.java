@@ -11,7 +11,7 @@ public class HTGEconomyExpansion extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "HTGEconomyAPI";
+        return "htgeconomyapi"; // %htgeconomyapi_<parametr>%
     }
 
     @Override
@@ -21,22 +21,34 @@ public class HTGEconomyExpansion extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "0.0.3-beta";
+        return "0.0.4-beta";
     }
 
     @Override
     public boolean persist() {
-        return true; // nie wyłącza się przy reloadzie
+        return true; // Placeholder działa po /reload
+    }
+
+    @Override
+    public boolean canRegister() {
+        return true;
     }
 
     @Override
     public String onRequest(OfflinePlayer player, String params) {
+        if (player == null || !player.hasPlayedBefore()) return "0";
+
         UUID uuid = player.getUniqueId();
 
+        // coins → np. %htgeconomyapi_coins%
         if (params.equalsIgnoreCase("coins")) {
             double coins = EconomyAPI.get(uuid);
-            String tag = CurrencyConfig.getTag("coins");
-            return coins + " " + tag;
+            return CurrencyConfig.format("coins", coins); // np. 1 500.0 💰
+        }
+
+        // coins_plain → bez formatu, np. do użytku matematycznego
+        if (params.equalsIgnoreCase("coins_plain")) {
+            return String.valueOf(EconomyAPI.get(uuid));
         }
 
         return null;
