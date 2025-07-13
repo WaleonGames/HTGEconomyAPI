@@ -9,11 +9,14 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.htgmc.htgeconomyapi.analysis.WealthAnalyzer;
 import pl.htgmc.htgeconomyapi.api.EconomyAPI;
+import pl.htgmc.htgeconomyapi.commands.BankCommand;
 import pl.htgmc.htgeconomyapi.commands.CoinsCommand;
 import pl.htgmc.htgeconomyapi.commands.DynamicStatsCommand;
 import pl.htgmc.htgeconomyapi.commands.TransferCommand;
 import pl.htgmc.htgeconomyapi.config.CurrencyConfig;
 import pl.htgmc.htgeconomyapi.data.CoinStorage;
+import pl.htgmc.htgeconomyapi.listener.BankGuiListener;
+import pl.htgmc.htgeconomyapi.listener.HistorieGuiListener;
 import pl.htgmc.htgeconomyapi.penalty.PenaltyManager;
 import pl.htgmc.htgeconomyapi.placeholder.HTGEconomyExpansion;
 import pl.htgmc.htgeconomyapi.stats.EconomyStatsSender;
@@ -69,6 +72,10 @@ public final class HTGEconomyAPI extends JavaPlugin {
         setupCommand("coins", new CoinsCommand(), "/coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>", "Zarządzaj monetami graczy.");
         setupCommand("dynamics", new DynamicStatsCommand(), "/dynamics", "Pokazuje statystyki dynamicznej ekonomii.");
         setupCommand("transfer", new TransferCommand(vaultEconomy), "/transfer [tohtg|tovault|toplayer] <kwota>", "Przewalutuj środki między Vault a HTG lub przekaż HTG innemu graczowi");
+        setupCommand("bank", new BankCommand(), "", "");
+
+        Bukkit.getPluginManager().registerEvents(new BankGuiListener(), this);
+        Bukkit.getPluginManager().registerEvents(new HistorieGuiListener(), this);
 
         // === HARMONOGRAM: Wysyłka statystyk ekonomii na Discord co 60 sekund ===
         getLogger().info("Rozpoczynanie automatycznej wysyłki statystyk na Discord...");

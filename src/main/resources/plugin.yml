@@ -17,6 +17,9 @@ commands:
   transfer:
     description: Przewalutuj środki lub przelej HTG do innego gracza
     usage: /transfer <tohtg|tovault|toplayer> <kwota> [nick]
+  bank:
+    description: Otwiera GUI banku gracza
+    usage: /bank
 
 permissions:
   htgcoins.admin:
