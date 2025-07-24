@@ -4,6 +4,13 @@
 
 ---
 
+## 📄 Dokumentacja
+
+- [Opcje integracji (Options.md)](Options.md)
+- [Instrukcja główna (README.md)](README.md)
+
+---
+
 ## ✅ Wymagania
 
 - Minecraft `1.20.x` / `1.21.x`  
