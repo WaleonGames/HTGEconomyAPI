@@ -108,7 +108,7 @@ Plugin automatycznie generuje wykres (linia, kolory, tło ciemne) i wysyła co 6
 ## 👨‍💻 Autor
 
 - Projekt stworzony przez **ToJaWGYT**  
-- Wersja: `0.0.4-beta`/`0.0.5-beta`  
+- Wersja: `0.0.5-beta`/`0.0.6.1-beta`  
 - Plugin wykorzystywany w ekosystemie HTGMC  
 
 ---
