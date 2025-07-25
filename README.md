@@ -4,6 +4,13 @@
 
 ---
 
+## 📄 Dokumentacja
+
+- [Opcje integracji (Options.md)](Options.md)
+- [Instrukcja główna (README.md)](README.md)
+
+---
+
 ## ✅ Wymagania
 
 - Minecraft `1.20.x` / `1.21.x`  
@@ -40,6 +47,7 @@
 |-------------------|--------------|
 | **HTGSklep**       | `0.0.6-beta` |
 | **HTGSprawdzanie** | `0.0.4-beta` |
+| **HTG2137** | `0.0.6.1-beta` |
 
 [![](https://jitpack.io/v/WaleonGames/HTGEconomyAPI.svg)](https://jitpack.io/#WaleonGames/HTGEconomyAPI)
 
@@ -65,6 +73,7 @@
 | `/coins`       | Admin: dodaj, usuń, ustaw, kara                   |
 | `/dynamics`    | Pokazuje aktualny stan ekonomii (suma, średnia)  |
 | `/transfer`    | Przewalutuj środki Vault ⇄ HTG lub przelej HTG innemu graczowi |
+| `/bank`    | Przez komende ban otworzysz gui z informacjami o twojej końcie ekonomicznej |
 
 ---
 
@@ -99,7 +108,7 @@ Plugin automatycznie generuje wykres (linia, kolory, tło ciemne) i wysyła co 6
 ## 👨‍💻 Autor
 
 - Projekt stworzony przez **ToJaWGYT**  
-- Wersja: `0.0.4-beta`/`0.0.5-beta`  
+- Wersja: `0.0.5-beta`/`0.0.6.1-beta`  
 - Plugin wykorzystywany w ekosystemie HTGMC  
 
 ---
