@@ -65,14 +65,20 @@ public class CoinStorage {
         return balances.getOrDefault(uuid, 0.0);
     }
 
-    // Ustaw monety
+    // Ustaw monety (maksymalnie 1 000 000)
     public static void setCoins(UUID uuid, double amount) {
+        if (amount > 1_000_000) amount = 1_000_000;
         balances.put(uuid, amount);
     }
 
-    // Dodaj monety
+    // Dodaj monety (maksymalnie 1 000 000)
     public static void addCoins(UUID uuid, double amount) {
-        balances.put(uuid, getCoins(uuid) + amount);
+        double current = getCoins(uuid);
+        double total = current + amount;
+        if (total > 1_000_000) {
+            total = 1_000_000;
+        }
+        balances.put(uuid, total);
     }
 
     // Odejmij monety (nie mniej niż 0)

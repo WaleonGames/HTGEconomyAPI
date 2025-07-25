@@ -20,6 +20,7 @@ import pl.htgmc.htgeconomyapi.listener.HistorieGuiListener;
 import pl.htgmc.htgeconomyapi.penalty.PenaltyManager;
 import pl.htgmc.htgeconomyapi.placeholder.HTGEconomyExpansion;
 import pl.htgmc.htgeconomyapi.stats.EconomyStatsSender;
+import pl.htgmc.htgeconomyapi.utils.VersionChecker;
 
 public final class HTGEconomyAPI extends JavaPlugin {
 
@@ -30,6 +31,12 @@ public final class HTGEconomyAPI extends JavaPlugin {
         instance = this;
 
         getLogger().info("=====[ HTG Economy API ]=====");
+
+        if (!VersionChecker.checkVersion(this)) {
+            getLogger().severe("Plugin zostanie wyłączony z powodu niekompatybilnej wersji.");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
 
         // === INTEGRACJE Z ZEWNĘTRZNYMI PLUGINAMI ===
         getLogger().info("===[ Obsługiwane Pluginy ]===");

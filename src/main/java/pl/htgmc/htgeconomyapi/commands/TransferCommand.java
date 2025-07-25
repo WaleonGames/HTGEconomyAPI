@@ -19,8 +19,17 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
 
     private final Map<UUID, Long> lastConversion = new HashMap<>();
 
+    private static final double MIN_CONVERSION = 10.0;       // Minimalna kwota do konwersji
+    private static final double MAX_CONVERSION = 10000.0;    // Maksymalna kwota w jednej operacji
+    private static final double DAILY_LIMIT = 50000.0;       // Limit dzienny konwersji
+    private final Map<UUID, Double> dailyUsage = new HashMap<>(); // Śledzenie konwersji na 24h
+
     public TransferCommand(Economy vault) {
         this.vault = vault;
+    }
+
+    public void resetDailyLimits() {
+        dailyUsage.clear();
     }
 
     @Override
@@ -68,25 +77,79 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
 
             if (direction.equals("tohtg")) {
                 double vaultBalance = vault.getBalance(player);
+
+                // --- Twarde ograniczenia ---
+                if (amount < MIN_CONVERSION) {
+                    player.sendMessage("§a§lEkonomia §cMinimalna kwota do konwersji to " + MIN_CONVERSION);
+                    return true;
+                }
+                if (amount > MAX_CONVERSION) {
+                    player.sendMessage("§a§lEkonomia §cMaksymalna kwota do konwersji to " + MAX_CONVERSION);
+                    return true;
+                }
+
+                double used = dailyUsage.getOrDefault(uuid, 0.0);
+                if (used + amount > DAILY_LIMIT) {
+                    player.sendMessage("§a§lEkonomia §cPrzekroczyłeś dzienny limit konwersji (" + DAILY_LIMIT + ")");
+                    return true;
+                }
+
                 if (vaultBalance < amount) {
                     player.sendMessage("§a§lEkonomia §cNie masz tylu środków w Vault. Masz: " +
                             String.format("%.2f", vaultBalance));
                     return true;
                 }
 
-                double converted = amount / multiplier;
+                // --- Progresywny podatek ---
+                double taxRate = 0.0;
+                if (amount > 50000) {
+                    if (amount > 1_000_000) taxRate = 0.25;
+                    else if (amount > 500_000) taxRate = 0.20;
+                    else if (amount > 250_000) taxRate = 0.15;
+                    else if (amount > 100_000) taxRate = 0.10;
+                    else taxRate = 0.05;
+                }
+
+                double taxedAmount = amount * (1.0 - taxRate);
+                double converted = taxedAmount / multiplier;
+
                 vault.withdrawPlayer(player, amount);
                 CoinStorage.addCoins(uuid, converted);
                 CoinStorage.save();
 
+                dailyUsage.put(uuid, used + amount);
                 lastConversion.put(uuid, now);
-                player.sendMessage("§a§lEkonomia §7Przewalutowano §a" + amount + "⛁ Vault → §e" +
+
+                if (taxRate > 0) {
+                    double tax = amount * taxRate;
+                    player.sendMessage("§c⚠ Podatek: " + (int)(taxRate * 100) + "% → odjęto §f" +
+                            String.format("%.2f", tax) + "⛁ z kwoty §f" + String.format("%.2f", amount));
+                }
+
+                player.sendMessage("§a§lEkonomia §7Przewalutowano §a" + String.format("%.2f", amount) + "⛁ Vault → §e" +
                         String.format("%.2f", converted) + " HTG §7(kurs x" +
                         String.format("%.2f", multiplier) + ")");
                 return true;
 
             } else { // tovault
                 double htgBalance = CoinStorage.getCoins(uuid);
+
+                // --- Twarde ograniczenia ---
+                if (amount < MIN_CONVERSION) {
+                    player.sendMessage("§a§lEkonomia §cMinimalna kwota do konwersji to " + MIN_CONVERSION);
+                    return true;
+                }
+                if (amount > MAX_CONVERSION) {
+                    player.sendMessage("§a§lEkonomia §cMaksymalna kwota do konwersji to " + MAX_CONVERSION);
+                    return true;
+                }
+
+                double used = dailyUsage.getOrDefault(uuid, 0.0);
+                if (used + (amount * multiplier) > DAILY_LIMIT) {
+                    player.sendMessage("§a§lEkonomia §cPrzekroczyłeś dzienny limit konwersji (" + DAILY_LIMIT + ")");
+                    return true;
+                }
+
                 if (htgBalance < amount) {
                     player.sendMessage("§a§lEkonomia §cNie masz tylu środków w HTG. Masz: " +
                             String.format("%.2f", htgBalance));
@@ -98,13 +161,14 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
                 CoinStorage.save();
                 vault.depositPlayer(player, converted);
 
+                dailyUsage.put(uuid, used + converted);
                 lastConversion.put(uuid, now);
+
                 player.sendMessage("§a§lEkonomia §7Przewalutowano §e" + amount + " HTG → §a" +
                         String.format("%.2f", converted) + "⛁ Vault §7(kurs x" +
                         String.format("%.2f", multiplier) + ")");
                 return true;
             }
-
         }
 
         else if (direction.equals("toplayer")) {

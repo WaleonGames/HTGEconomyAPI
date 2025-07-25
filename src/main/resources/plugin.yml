@@ -2,6 +2,7 @@ name: HTGEconomyAPI
 version: '${project.version}'
 main: pl.htgmc.htgeconomyapi.HTGEconomyAPI
 api-version: '1.21'
+author: ToJaWGYT
 depend:
   - PlaceholderAPI
   - LuckPerms
