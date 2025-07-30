@@ -56,18 +56,21 @@ public class WealthAnalyzer {
     }
 
     public static double getCombinedDynamicMultiplier() {
-        // 1. Czynnik bogactwa
         double avgCoins = getAverageCoins();
-        double wealthFactor = Math.min(1 + (avgCoins / 10000), 2.0); // max x2
 
-        // 2. Czynnik rang
+        double wealthFactor = 1.0 + (avgCoins / 1_000_000.0) * 1.0;
+        wealthFactor = Math.min(wealthFactor, 3.0);
+
         Map<String, Integer> groups = getGroupDistribution();
-        if (groups.isEmpty()) return wealthFactor; // tylko bogactwo
+
+        if (groups.isEmpty()) {
+            return wealthFactor;
+        }
 
         Map<String, Double> weights = new HashMap<>();
         weights.put("default", 1.0);
-        weights.put("vip", 1.2);
-        weights.put("vip+", 1.5);
+        weights.put("vip", 1.5);
+        weights.put("vip+", 2.0);
 
         int totalPlayers = 0;
         double totalWeight = 0.0;
@@ -83,9 +86,9 @@ public class WealthAnalyzer {
 
         double rankFactor = totalPlayers > 0 ? (totalWeight / totalPlayers) : 1.0;
 
-        // 3. Mnożnik końcowy = coins * rangi
         double combined = wealthFactor * rankFactor;
+        combined = Math.max(1.0, Math.min(combined, 3.0));
 
-        return Math.min(combined, 3.0); // maksymalnie x3
+        return combined;
     }
 }

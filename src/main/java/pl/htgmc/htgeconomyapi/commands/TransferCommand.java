@@ -18,6 +18,8 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
     private static final int CONVERSION_COOLDOWN_SECONDS = 60;
 
     private final Map<UUID, Long> lastConversion = new HashMap<>();
+    private final Map<UUID, Double> dailyTransfers = new HashMap<>();
+    private final Map<UUID, Long> lastTransferReset = new HashMap<>();
 
     private static final double MIN_CONVERSION = 10.0;       // Minimalna kwota do konwersji
     private static final double MAX_CONVERSION = 10000.0;    // Maksymalna kwota w jednej operacji
@@ -30,6 +32,16 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
 
     public void resetDailyLimits() {
         dailyUsage.clear();
+    }
+
+    private void resetTransferLimitIfNeeded(UUID uuid) {
+        long now = System.currentTimeMillis();
+        long last = lastTransferReset.getOrDefault(uuid, 0L);
+
+        if (now - last > 24 * 60 * 60 * 1000L) {
+            dailyTransfers.put(uuid, 0.0);
+            lastTransferReset.put(uuid, now);
+        }
     }
 
     @Override
@@ -193,9 +205,21 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            UUID senderId = player.getUniqueId();
-            double senderBalance = CoinStorage.getCoins(senderId);
+            if (amount > 10_000.0) {
+                player.sendMessage("§a§lEkonomia §cMaksymalna kwota pojedynczego przelewu to 10 000 HTG.");
+                return true;
+            }
 
+            UUID senderId = player.getUniqueId();
+            resetTransferLimitIfNeeded(senderId);
+
+            double used = dailyTransfers.getOrDefault(senderId, 0.0);
+            if (used + amount > 50_000.0) {
+                player.sendMessage("§a§lEkonomia §cPrzekroczyłeś dzienny limit przelewów (50 000 HTG).");
+                return true;
+            }
+
+            double senderBalance = CoinStorage.getCoins(senderId);
             if (senderBalance < amount) {
                 player.sendMessage("§a§lEkonomia §cNie masz wystarczająco HTG. Masz: " +
                         String.format("%.2f", senderBalance));
@@ -213,6 +237,8 @@ public class TransferCommand implements CommandExecutor, TabCompleter {
             CoinStorage.removeCoins(senderId, amount);
             CoinStorage.addCoins(receiverId, amount);
             CoinStorage.save();
+
+            dailyTransfers.put(senderId, used + amount);
 
             player.sendMessage("§a§lEkonomia §7Przesłałeś §e" + amount + " HTG §7do §a" + targetPlayer.getName());
             targetPlayer.sendMessage("§a§lEkonomia §7Otrzymałeś §e" + amount +

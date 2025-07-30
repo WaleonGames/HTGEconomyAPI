@@ -7,8 +7,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
-import pl.htgmc.htgeconomyapi.analysis.WealthAnalyzer;
-import pl.htgmc.htgeconomyapi.api.EconomyAPI;
 import pl.htgmc.htgeconomyapi.commands.BankCommand;
 import pl.htgmc.htgeconomyapi.commands.CoinsCommand;
 import pl.htgmc.htgeconomyapi.commands.DynamicStatsCommand;
