@@ -44,14 +44,14 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
 
             UUID uuid = player.getUniqueId();
             double balance = EconomyAPI.get(uuid);
-            player.sendMessage(ChatColor.GREEN + "💰 Twoje saldo: " + ChatColor.GOLD + balance + " " + tag);
+            player.sendMessage(ChatColor.GREEN + "Twoje saldo: " + ChatColor.GOLD + balance + " " + tag);
             return true;
         }
 
         // /coins manager <nick> ...
         if (args.length >= 2 && args[0].equalsIgnoreCase("manager")) {
             if (!sender.hasPermission("htgcoins.admin")) {
-                sender.sendMessage(ChatColor.RED + "⛔ Brak uprawnień: htgcoins.admin");
+                sender.sendMessage(ChatColor.RED + "Brak uprawnień: htgcoins.admin");
                 return true;
             }
 
@@ -60,12 +60,12 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
 
             if (args.length == 3 && args[2].equalsIgnoreCase("info")) {
                 double balance = EconomyAPI.get(uuid);
-                sender.sendMessage(ChatColor.GREEN + "💰 Saldo gracza " + target.getName() + ": " + ChatColor.GOLD + balance + " " + tag);
+                sender.sendMessage(ChatColor.GREEN + "Saldo gracza " + target.getName() + ": " + ChatColor.GOLD + balance + " " + tag);
                 return true;
             }
 
             if (args.length < 5) {
-                sender.sendMessage(ChatColor.RED + "⛔ Użycie: /coins manager <nick> [dodaj|usun|ustaw|kara] <kwota> <powód> [\"kod\"]");
+                sender.sendMessage(ChatColor.RED + "Użycie: /coins manager <nick> [dodaj|usun|ustaw|kara] <kwota> <powód> [\"kod\"]");
                 return true;
             }
 
@@ -84,7 +84,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
 
             // Sprawdzenie limitów
             if (requiresConfirmation(action, amount, confirmCode)) {
-                sender.sendMessage(ChatColor.RED + "⛔ Kwota przekracza bezpieczny limit. Wymagany kod potwierdzający w cudzysłowie jako ostatni argument.");
+                sender.sendMessage(ChatColor.RED + "Kwota przekracza bezpieczny limit. Wymagany kod potwierdzający w cudzysłowie jako ostatni argument.");
                 return true;
             }
 
@@ -92,42 +92,42 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
                 case "dodaj" -> {
                     EconomyAPI.add(uuid, amount);
                     EconomyAPI.save();
-                    sender.sendMessage(ChatColor.GREEN + "✅ Dodano " + amount + " " + tag + " graczowi " + target.getName() + ". Powód: " + reason);
+                    sender.sendMessage(ChatColor.GREEN + "Dodano " + amount + " " + tag + " graczowi " + target.getName() + ". Powód: " + reason);
                     if (target.isOnline()) {
-                        ((Player) target).sendMessage(ChatColor.GREEN + "💸 Otrzymałeś +" + amount + " " + tag + ". Powód: " + reason);
+                        ((Player) target).sendMessage(ChatColor.GREEN + "Otrzymałeś +" + amount + " " + tag + ". Powód: " + reason);
                     }
                 }
                 case "usun" -> {
                     EconomyAPI.remove(uuid, amount);
                     EconomyAPI.save();
-                    sender.sendMessage(ChatColor.YELLOW + "➖ Usunięto " + amount + " " + tag + " od gracza " + target.getName() + ". Powód: " + reason);
+                    sender.sendMessage(ChatColor.YELLOW + "Usunięto " + amount + " " + tag + " od gracza " + target.getName() + ". Powód: " + reason);
                     if (target.isOnline()) {
-                        ((Player) target).sendMessage(ChatColor.RED + "💸 Zabrano -" + amount + " " + tag + ". Powód: " + reason);
+                        ((Player) target).sendMessage(ChatColor.RED + "Zabrano -" + amount + " " + tag + ". Powód: " + reason);
                     }
                 }
                 case "ustaw" -> {
                     EconomyAPI.set(uuid, amount);
                     EconomyAPI.save();
-                    sender.sendMessage(ChatColor.AQUA + "🔁 Ustawiono saldo gracza " + target.getName() + " na " + amount + " " + tag + ". Powód: " + reason);
+                    sender.sendMessage(ChatColor.AQUA + "Ustawiono saldo gracza " + target.getName() + " na " + amount + " " + tag + ". Powód: " + reason);
                     if (target.isOnline()) {
-                        ((Player) target).sendMessage(ChatColor.AQUA + "💰 Twoje saldo zostało ustawione na " + amount + " " + tag + ". Powód: " + reason);
+                        ((Player) target).sendMessage(ChatColor.AQUA + "Twoje saldo zostało ustawione na " + amount + " " + tag + ". Powód: " + reason);
                     }
                 }
                 case "kara" -> {
                     PenaltyManager.apply(uuid, amount, reason);
                     EconomyAPI.save();
-                    sender.sendMessage(ChatColor.DARK_RED + "⚠️ Ukarano gracza " + target.getName() + " kwotą -" + amount + " " + tag + ". Powód: " + reason);
+                    sender.sendMessage(ChatColor.DARK_RED + "Ukarano gracza " + target.getName() + " kwotą -" + amount + " " + tag + ". Powód: " + reason);
                     if (target.isOnline()) {
-                        ((Player) target).sendMessage(ChatColor.RED + "❗ Zostałeś ukarany kwotą -" + amount + " " + tag + ". Powód: " + reason);
+                        ((Player) target).sendMessage(ChatColor.RED + "Zostałeś ukarany kwotą -" + amount + " " + tag + ". Powód: " + reason);
                     }
                 }
-                default -> sender.sendMessage(ChatColor.RED + "❓ Nieznana akcja. Użyj: dodaj | usun | ustaw | kara | info");
+                default -> sender.sendMessage(ChatColor.RED + "Nieznana akcja. Użyj: dodaj | usun | ustaw | kara | info");
             }
 
             return true;
         }
 
-        sender.sendMessage(ChatColor.RED + "⛔ Ta komenda nie istnieje. Użyj /coins lub /coins manager <nick>");
+        sender.sendMessage(ChatColor.RED + "Ta komenda nie istnieje. Użyj /coins lub /coins manager <nick>");
         return true;
     }
 
@@ -145,7 +145,7 @@ public class CoinsCommand implements CommandExecutor, TabCompleter {
         try {
             return Double.parseDouble(input);
         } catch (NumberFormatException e) {
-            sender.sendMessage(ChatColor.RED + "⛔ Podana kwota nie jest liczbą.");
+            sender.sendMessage(ChatColor.RED + "Podana kwota nie jest liczbą.");
             throw e;
         }
     }

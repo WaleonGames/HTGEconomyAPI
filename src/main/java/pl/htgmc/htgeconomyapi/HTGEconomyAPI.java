@@ -19,10 +19,28 @@ import pl.htgmc.htgeconomyapi.penalty.PenaltyManager;
 import pl.htgmc.htgeconomyapi.placeholder.HTGEconomyExpansion;
 import pl.htgmc.htgeconomyapi.stats.EconomyStatsSender;
 import pl.htgmc.htgeconomyapi.utils.VersionChecker;
+import pl.htgmc.htgeconomyapi.taxes.WealthTax;
+
+// === gratisy ===
+import pl.htgmc.htgeconomyapi.gratisy.DailyRewardManager;
+import pl.htgmc.htgeconomyapi.gratisy.GoldenWeekManager;
+
+// === API ===
+import pl.htgmc.htgeconomyapi.api.PluginSupportAPI;
+
+import java.io.File;
+import java.time.DayOfWeek;
 
 public final class HTGEconomyAPI extends JavaPlugin {
 
     private static HTGEconomyAPI instance;
+
+    // === MENEDŻERY GRATISÓW ===
+    private DailyRewardManager dailyRewardManager;
+    private GoldenWeekManager goldenWeekManager;
+
+    // === API ===
+    private PluginSupportAPI pluginSupportAPI;
 
     @Override
     public void onEnable() {
@@ -36,6 +54,11 @@ public final class HTGEconomyAPI extends JavaPlugin {
             return;
         }
 
+        // === Inicjalizacja API wsparcia ===
+        this.pluginSupportAPI = new PluginSupportAPI();
+        getLogger().info("Sprawdzanie kompatybilności API...");
+        getLogger().info(pluginSupportAPI.getStatusMessage("0.0.7.1-beta")); // tu np. minimalna wymagana
+
         // === INTEGRACJE Z ZEWNĘTRZNYMI PLUGINAMI ===
         getLogger().info("===[ Obsługiwane Pluginy ]===");
 
@@ -43,21 +66,21 @@ public final class HTGEconomyAPI extends JavaPlugin {
             new HTGEconomyExpansion().register();
             getLogger().info("Zintegrowano z PlaceholderAPI.");
         } else {
-            getLogger().warning("PlaceholderAPI nie wykryto, serwer wyłącza sie.");
+            getLogger().warning("PlaceholderAPI nie wykryto, serwer wyłącza się.");
             getServer().shutdown();
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
             getLogger().info("Wykryto poprawnie LuckPerms.");
         } else {
-            getLogger().warning("LuckPerms nie wykryto, serwer wyłącza sie.");
+            getLogger().warning("LuckPerms nie wykryto, serwer wyłącza się.");
             getServer().shutdown();
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
             getLogger().info("Wykryto poprawnie Vault.");
         } else {
-            getLogger().warning("Vault nie wykryto, serwer wyłącza sie.");
+            getLogger().warning("Vault nie wykryto, serwer wyłącza się.");
             getServer().shutdown();
         }
 
@@ -70,6 +93,22 @@ public final class HTGEconomyAPI extends JavaPlugin {
         EconomyStatsSender.loadHistory();
         PenaltyManager.init(getDataFolder());
         Economy vaultEconomy = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
+
+        // === GRATISY ===
+        File gratisyDir = new File(getDataFolder(), "gratisy");
+        if (!gratisyDir.exists()) gratisyDir.mkdirs();
+
+        this.dailyRewardManager = new DailyRewardManager(getDataFolder());
+        this.goldenWeekManager = new GoldenWeekManager(getDataFolder(), 0.01, 5.0, DayOfWeek.MONDAY);
+
+        // scheduler – sprawdzanie złotego tygodnia co godzinę
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            try {
+                goldenWeekManager.tick();
+            } catch (Exception e) {
+                getLogger().warning("Błąd podczas sprawdzania GoldenWeek: " + e.getMessage());
+            }
+        }, 20L, 20L * 60 * 60);
 
         // === KOMENDY ===
         getLogger().info("===[ Obsługa Komendów ]===");
@@ -84,7 +123,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
         // === HARMONOGRAM: Wysyłka statystyk ekonomii na Discord co 60 sekund ===
         getLogger().info("Rozpoczynanie automatycznej wysyłki statystyk na Discord...");
-
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {
                 EconomyStatsSender.sendStats();
@@ -92,6 +130,17 @@ public final class HTGEconomyAPI extends JavaPlugin {
                 getLogger().warning("Błąd podczas wysyłania statystyk ekonomii: " + e.getMessage());
             }
         }, 20L * 60, 20L * 60);
+
+        // === HARMONOGRAM: Podatek od trzymania pieniędzy co 6 godzin ===
+        getLogger().info("Rozpoczynanie naliczania podatku od trzymania pieniędzy...");
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            try {
+                WealthTax.apply();
+                getLogger().info("Podatek od trzymania pieniędzy został naliczony.");
+            } catch (Exception e) {
+                getLogger().warning("Błąd podczas naliczania podatku od trzymania pieniędzy: " + e.getMessage());
+            }
+        }, 20L, 20L * 60 * 60 * 6);
 
         getLogger().info("Plugin HTGEconomyAPI został pomyślnie uruchomiony.");
         getLogger().info("===============================");
@@ -105,6 +154,18 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
     public static HTGEconomyAPI getInstance() {
         return instance;
+    }
+
+    public DailyRewardManager getDailyRewardManager() {
+        return dailyRewardManager;
+    }
+
+    public GoldenWeekManager getGoldenWeekManager() {
+        return goldenWeekManager;
+    }
+
+    public PluginSupportAPI getPluginSupportAPI() {
+        return pluginSupportAPI;
     }
 
     private void setupCommand(String name, Object executor, String usage, String description) {
