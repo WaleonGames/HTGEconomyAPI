@@ -26,7 +26,6 @@ import pl.htgmc.htgeconomyapi.gratisy.DailyRewardManager;
 import pl.htgmc.htgeconomyapi.gratisy.GoldenWeekManager;
 
 // === API ===
-import pl.htgmc.htgeconomyapi.api.PluginSupportAPI;
 
 import java.io.File;
 import java.time.DayOfWeek;
@@ -39,9 +38,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
     private DailyRewardManager dailyRewardManager;
     private GoldenWeekManager goldenWeekManager;
 
-    // === API ===
-    private PluginSupportAPI pluginSupportAPI;
-
     @Override
     public void onEnable() {
         instance = this;
@@ -53,11 +49,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-
-        // === Inicjalizacja API wsparcia ===
-        this.pluginSupportAPI = new PluginSupportAPI();
-        getLogger().info("Sprawdzanie kompatybilności API...");
-        getLogger().info(pluginSupportAPI.getStatusMessage("0.0.7.1-beta")); // tu np. minimalna wymagana
 
         // === INTEGRACJE Z ZEWNĘTRZNYMI PLUGINAMI ===
         getLogger().info("===[ Obsługiwane Pluginy ]===");
@@ -162,10 +153,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
     public GoldenWeekManager getGoldenWeekManager() {
         return goldenWeekManager;
-    }
-
-    public PluginSupportAPI getPluginSupportAPI() {
-        return pluginSupportAPI;
     }
 
     private void setupCommand(String name, Object executor, String usage, String description) {
