@@ -1,0 +1,37 @@
+# =========================================================
+# PODATKI - KONFIGURACJA
+# Ten plik definiuje oficjalne podatki w HTGEconomyAPI
+# =========================================================
+
+# ---------------------------------------------------------
+# Podatek od majątku (Wealth Tax)
+# Naliczany co określony czas (np. co 12 godzin)
+# Jeśli gracz ma saldo równe lub większe niż próg "amount"
+# to zostanie pobrana stawka "rate" (w ułamkach, np. 0.05 = 5%)
+# ---------------------------------------------------------
+wealth_tax:
+  thresholds:
+    - amount: 500000      # od 500 tys. - 5%
+      rate: 0.05
+    - amount: 1000000     # od 1 mln - 10%
+      rate: 0.10
+    - amount: 2000000     # od 2 mln - 15%
+      rate: 0.15
+    - amount: 2500000     # od 2,5 mln - 17,5%
+      rate: 0.175
+    - amount: 5000000     # od 5 mln - 22,5%
+      rate: 0.225
+    - amount: 10000000    # od 10 mln - 30%
+      rate: 0.30
+    - amount: 50000000    # od 50 mln - 35%
+      rate: 0.35
+    - amount: 100000000   # od 100 mln - 40%
+      rate: 0.40
+
+# ---------------------------------------------------------
+# Podatek od wymiany walut (Currency Exchange Tax)
+# Pobierany przy każdej wymianie waluty (np. PLN -> USD w grze)
+# Wartość podajemy w ułamkach (0.05 = 5%)
+# ---------------------------------------------------------
+currency_exchange_tax:
+  rate: 0.05
