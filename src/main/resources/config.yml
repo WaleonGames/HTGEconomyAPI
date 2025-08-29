@@ -1,7 +1,7 @@
 version-check:
   enabled: true
 
-storage: mysql
+storage: sqlite
 
 mysql:
   host: "localhost"

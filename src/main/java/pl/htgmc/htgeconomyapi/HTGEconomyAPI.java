@@ -35,6 +35,9 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
     private static HTGEconomyAPI instance;
 
+    // === VAULT ===
+    private Economy vaultEconomy;
+
     // === BAZA DANYCH ===
     private static DatabaseManager database;
 
@@ -62,6 +65,7 @@ public final class HTGEconomyAPI extends JavaPlugin {
         } else {
             getLogger().warning("PlaceholderAPI nie wykryto, serwer wyłącza się.");
             getServer().shutdown();
+            return;
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
@@ -69,13 +73,11 @@ public final class HTGEconomyAPI extends JavaPlugin {
         } else {
             getLogger().warning("LuckPerms nie wykryto, serwer wyłącza się.");
             getServer().shutdown();
+            return;
         }
 
-        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-            getLogger().info("Wykryto poprawnie Vault.");
-        } else {
-            getLogger().warning("Vault nie wykryto, serwer wyłącza się.");
-            getServer().shutdown();
+        if (!setupEconomy()) {
+            getLogger().severe("Niekompletny plugin, ponieważ nie wykryto poprawnej ekonomii Vault.");
         }
 
         // === KONFIGURACJA I BAZA DANYCH ===
@@ -102,7 +104,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
         CurrencyConfig.load(getDataFolder());
         EconomyStatsSender.loadHistory();
         PenaltyManager.init(getDataFolder());
-        Economy vaultEconomy = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
 
         // === GRATISY ===
         File gratisyDir = new File(getDataFolder(), "gratisy");
@@ -122,9 +123,23 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
         // === KOMENDY ===
         getLogger().info("===[ Obsługa Komendów ]===");
-        setupCommand("coins", new CoinsCommand(), "/coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>", "Zarządzaj monetami graczy.");
-        setupCommand("dynamics", new DynamicStatsCommand(), "/dynamics", "Pokazuje statystyki dynamicznej ekonomii.");
-        setupCommand("transfer", new TransferCommand(vaultEconomy), "/transfer [tohtg|tovault|toplayer] <kwota>", "Przewalutuj środki między Vault a HTG lub przekaż HTG innemu graczowi");
+        setupCommand("coins", new CoinsCommand(),
+                "/coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>",
+                "Zarządzaj monetami graczy.");
+        setupCommand("dynamics", new DynamicStatsCommand(),
+                "/dynamics",
+                "Pokazuje statystyki dynamicznej ekonomii.");
+        if (vaultEconomy != null) {
+            setupCommand("transfer", new TransferCommand(vaultEconomy),
+                    "/transfer [tohtg|tovault|toplayer] <kwota>",
+                    "Przewalutuj środki między Vault a HTG lub przekaż HTG innemu graczowi");
+        } else {
+            getLogger().warning("Komenda /transfer zostanie ograniczona – brak integracji z Vault.");
+            setupCommand("transfer", (CommandExecutor) (sender, cmd, label, args) -> {
+                sender.sendMessage("§cIntegracja z Vault jest niedostępna – komenda /transfer nie działa.");
+                return true;
+            }, "/transfer", "Niedostępne bez Vault");
+        }
         setupCommand("bank", new BankCommand(), "", "");
 
         Bukkit.getPluginManager().registerEvents(new BankGuiListener(), this);
@@ -190,5 +205,24 @@ public final class HTGEconomyAPI extends JavaPlugin {
         } else {
             getLogger().warning("Komenda /" + name + " nie została znaleziona w plugin.yml!");
         }
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().severe("Vault nie został znaleziony – plugin zostanie wyłączony!");
+            getServer().getPluginManager().disablePlugin(this);
+            return false;
+        }
+
+        var rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            getLogger().warning("Brak zarejestrowanej ekonomii kompatybilnej z Vault – integracja zostaje wyłączona.");
+            vaultEconomy = null;
+            return false;
+        }
+
+        vaultEconomy = rsp.getProvider();
+        getLogger().info("Podłączono ekonomię Vault: " + vaultEconomy.getName());
+        return true;
     }
 }
