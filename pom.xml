@@ -6,7 +6,7 @@
 
     <groupId>pl.htgmc</groupId>
     <artifactId>HTGEconomyAPI</artifactId>
-    <version>0.0.8.1-beta</version>
+    <version>0.0.8.2-beta</version>
     <packaging>jar</packaging>
 
     <name>HTGEconomyAPI</name>
@@ -76,28 +76,39 @@
             <version>1.21-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.11.6</version> <!-- Użyj najnowszej dostępnej wersji jeśli chcesz -->
+            <version>2.11.6</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>net.luckperms</groupId>
             <artifactId>api</artifactId>
             <version>5.4</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20240303</version>
+        </dependency>
+
+        <!-- Sterownik MariaDB -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.4.1</version> <!-- aktualna stabilna wersja -->
         </dependency>
     </dependencies>
 </project>

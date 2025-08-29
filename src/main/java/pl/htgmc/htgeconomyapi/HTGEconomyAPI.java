@@ -12,7 +12,9 @@ import pl.htgmc.htgeconomyapi.commands.CoinsCommand;
 import pl.htgmc.htgeconomyapi.commands.DynamicStatsCommand;
 import pl.htgmc.htgeconomyapi.commands.TransferCommand;
 import pl.htgmc.htgeconomyapi.config.CurrencyConfig;
-import pl.htgmc.htgeconomyapi.data.CoinStorage;
+import pl.htgmc.htgeconomyapi.database.DatabaseManager;
+import pl.htgmc.htgeconomyapi.database.MySQLDatabase;
+import pl.htgmc.htgeconomyapi.database.SQLiteDatabase;
 import pl.htgmc.htgeconomyapi.listener.BankGuiListener;
 import pl.htgmc.htgeconomyapi.listener.HistorieGuiListener;
 import pl.htgmc.htgeconomyapi.penalty.PenaltyManager;
@@ -26,13 +28,15 @@ import pl.htgmc.htgeconomyapi.gratisy.DailyRewardManager;
 import pl.htgmc.htgeconomyapi.gratisy.GoldenWeekManager;
 
 // === API ===
-
 import java.io.File;
 import java.time.DayOfWeek;
 
 public final class HTGEconomyAPI extends JavaPlugin {
 
     private static HTGEconomyAPI instance;
+
+    // === BAZA DANYCH ===
+    private static DatabaseManager database;
 
     // === MENEDŻERY GRATISÓW ===
     private DailyRewardManager dailyRewardManager;
@@ -52,7 +56,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
         // === INTEGRACJE Z ZEWNĘTRZNYMI PLUGINAMI ===
         getLogger().info("===[ Obsługiwane Pluginy ]===");
-
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new HTGEconomyExpansion().register();
             getLogger().info("Zintegrowano z PlaceholderAPI.");
@@ -75,11 +78,27 @@ public final class HTGEconomyAPI extends JavaPlugin {
             getServer().shutdown();
         }
 
-        // === WCZYTYWANIE KONFIGURACJI I DANYCH ===
-        getLogger().info("===[ Wczytywanie Konfiguracji Dan ]===");
+        // === KONFIGURACJA I BAZA DANYCH ===
+        saveDefaultConfig();
+        String storageType = getConfig().getString("storage", "sqlite");
 
-        getLogger().info("Ładowanie danych monet i konfiguracji...");
-        CoinStorage.load(getDataFolder());
+        if (storageType.equalsIgnoreCase("sqlite")) {
+            database = new SQLiteDatabase();
+            getLogger().info("Wybrano SQLite jako backend bazy danych.");
+        } else if (storageType.equalsIgnoreCase("mysql") || storageType.equalsIgnoreCase("mariadb")) {
+            String host = getConfig().getString("mysql.host");
+            int port = getConfig().getInt("mysql.port");
+            String db = getConfig().getString("mysql.database");
+            String user = getConfig().getString("mysql.username");
+            String pass = getConfig().getString("mysql.password");
+
+            database = new MySQLDatabase(host, port, db, user, pass);
+            getLogger().info("Wybrano MySQL/MariaDB jako backend bazy danych.");
+        }
+
+        database.connect();
+
+        // === WCZYTYWANIE INNYCH KONFIGURACJI ===
         CurrencyConfig.load(getDataFolder());
         EconomyStatsSender.loadHistory();
         PenaltyManager.init(getDataFolder());
@@ -103,7 +122,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
         // === KOMENDY ===
         getLogger().info("===[ Obsługa Komendów ]===");
-
         setupCommand("coins", new CoinsCommand(), "/coins <gracz> [dodaj|usun|ustaw|kara] <kwota> <powód>", "Zarządzaj monetami graczy.");
         setupCommand("dynamics", new DynamicStatsCommand(), "/dynamics", "Pokazuje statystyki dynamicznej ekonomii.");
         setupCommand("transfer", new TransferCommand(vaultEconomy), "/transfer [tohtg|tovault|toplayer] <kwota>", "Przewalutuj środki między Vault a HTG lub przekaż HTG innemu graczowi");
@@ -113,7 +131,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new HistorieGuiListener(), this);
 
         // === HARMONOGRAM: Wysyłka statystyk ekonomii na Discord co 60 sekund ===
-        getLogger().info("Rozpoczynanie automatycznej wysyłki statystyk na Discord...");
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {
                 EconomyStatsSender.sendStats();
@@ -123,7 +140,6 @@ public final class HTGEconomyAPI extends JavaPlugin {
         }, 20L * 60, 20L * 60);
 
         // === HARMONOGRAM: Podatek od trzymania pieniędzy co 6 godzin ===
-        getLogger().info("Rozpoczynanie naliczania podatku od trzymania pieniędzy...");
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             try {
                 WealthTax.apply();
@@ -131,7 +147,7 @@ public final class HTGEconomyAPI extends JavaPlugin {
             } catch (Exception e) {
                 getLogger().warning("Błąd podczas naliczania podatku od trzymania pieniędzy: " + e.getMessage());
             }
-        }, 20L, 20L * 60 * 60 * 6);
+        }, 20L, 20L * 60 * 60);
 
         getLogger().info("Plugin HTGEconomyAPI został pomyślnie uruchomiony.");
         getLogger().info("===============================");
@@ -139,12 +155,16 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        CoinStorage.save();
-        getLogger().info("Coins zapisane przed wyłączeniem.");
+        if (database != null) database.disconnect();
+        getLogger().info("Baza danych zamknięta przed wyłączeniem.");
     }
 
     public static HTGEconomyAPI getInstance() {
         return instance;
+    }
+
+    public static DatabaseManager getDatabase() {
+        return database;
     }
 
     public DailyRewardManager getDailyRewardManager() {
