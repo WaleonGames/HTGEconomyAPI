@@ -98,4 +98,11 @@ public class CoinStorage {
         double coins = getCoins(uuid);
         return CurrencyConfig.format("coins", coins);
     }
+
+    /**
+     * Zwraca sumę wszystkich monet w systemie
+     */
+    public static double getAllCoins() {
+        return balances.values().stream().mapToDouble(Double::doubleValue).sum();
+    }
 }

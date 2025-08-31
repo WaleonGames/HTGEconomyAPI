@@ -12,8 +12,15 @@ public class VersionChecker {
 
     private static final String GITHUB_API = "https://api.github.com/repos/WaleonGames/HTGEconomyAPI/releases";
 
+    /**
+     * Sprawdza, czy aktualna wersja pluginu jest wspierana na podstawie GitHub API.
+     *
+     * @param plugin instancja pluginu
+     * @return true jeśli wersja jest wspierana, false jeśli nie
+     */
     public static boolean checkVersion(Plugin plugin) {
         String localVersion = plugin.getDescription().getVersion();
+        String localSeries = normalizeVersion(localVersion);
 
         try {
             HttpURLConnection connection = (HttpURLConnection) new URL(GITHUB_API).openConnection();
@@ -27,7 +34,9 @@ public class VersionChecker {
 
                 List<String> versions = new ArrayList<>();
                 for (String entry : json.toString().split("\\{")) {
-                    if (entry.contains("\"tag_name\"") && !entry.contains("\"draft\":true") && !entry.contains("\"prerelease\":true")) {
+                    if (entry.contains("\"tag_name\"") &&
+                            !entry.contains("\"draft\":true") &&
+                            !entry.contains("\"prerelease\":true")) {
                         String tag = entry.split("\"tag_name\":\"")[1].split("\"")[0];
                         versions.add(tag);
                     }
@@ -38,25 +47,62 @@ public class VersionChecker {
                     return true;
                 }
 
+                // sortujemy po stringach (np. 0.0.8.2p-beta → 0.0.8.2p-beta)
                 versions.sort(Comparator.reverseOrder());
-                List<String> supported = versions.subList(0, Math.min(3, versions.size()));
 
-                if (!supported.contains(localVersion)) {
-                    Bukkit.getLogger().severe("Wersja HTGEconomyAPI (" + localVersion + ") nie jest wspierana!");
-                    Bukkit.getLogger().severe("Aktualne wspierane wersje to:");
-                    for (int i = 0; i < supported.size(); i++) {
-                        Bukkit.getLogger().severe("  " + i + ": " + supported.get(i));
+                // bierzemy najnowsze 5
+                List<String> supported = versions.subList(0, Math.min(5, versions.size()));
+
+                // normalizujemy serie
+                Set<String> supportedSeries = new HashSet<>();
+                for (String v : supported) {
+                    supportedSeries.add(normalizeVersion(v));
+                }
+
+                if (!supportedSeries.contains(localSeries)) {
+                    Bukkit.getLogger().severe("⚠ Wersja HTGEconomyAPI (" + localVersion + ", seria " + localSeries + ") nie jest już wspierana!");
+                    Bukkit.getLogger().severe("Obsługiwane obecnie serie:");
+                    for (String s : supportedSeries) {
+                        Bukkit.getLogger().severe("  - " + s);
                     }
                     return false;
                 }
 
-                Bukkit.getLogger().info("Wersja HTGEconomyAPI (" + localVersion + ") jest wspierana (" + supported.indexOf(localVersion) + ": najnowsze).");
+                Bukkit.getLogger().info("✅ Wersja HTGEconomyAPI (" + localVersion + ") jest wspierana (seria: " + localSeries + ").");
                 return true;
             }
 
         } catch (Exception e) {
-            Bukkit.getLogger().warning("Nie udało się sprawdzić wersji HTGEconomyAPI z GitHub. Kontynuacja mimo błędu.");
+            Bukkit.getLogger().warning("⚠ Nie udało się sprawdzić wersji HTGEconomyAPI z GitHub. Kontynuacja mimo błędu.");
             return true;
         }
+    }
+
+    /**
+     * Normalizuje wersję do serii.
+     * Przykłady:
+     *  - 0.0.8.2p-beta → 0.0.8.x
+     *  - 0.0.8.1 → 0.0.8.x
+     *  - 0.0.8 → 0.0.8
+     *  - 0.0.7.1 → 0.0.7.x
+     *  - 0.0.7 → 0.0.7
+     */
+    public static String normalizeVersion(String version) {
+        if (version == null || version.isEmpty()) return "unknown";
+
+        // usuwamy np. "-beta", "-p"
+        String clean = version.replaceAll("[-a-zA-Z]", "");
+        String[] parts = clean.split("\\.");
+
+        if (parts.length >= 4) {
+            return parts[0] + "." + parts[1] + "." + parts[2] + ".x";
+        }
+        if (parts.length == 3) {
+            return parts[0] + "." + parts[1] + "." + parts[2];
+        }
+        if (parts.length == 2) {
+            return parts[0] + "." + parts[1];
+        }
+        return clean;
     }
 }
