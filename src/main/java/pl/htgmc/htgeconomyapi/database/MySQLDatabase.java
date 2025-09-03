@@ -1,6 +1,8 @@
 package pl.htgmc.htgeconomyapi.database;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,6 +74,29 @@ public class MySQLDatabase implements DatabaseManager {
             logger.log(Level.WARNING, "Błąd podczas pobierania balansu gracza: " + uuid, e);
         }
         return 0.0;
+    }
+
+    @Override
+    public Map<UUID, Double> getAllBalances() {
+        Map<UUID, Double> balances = new HashMap<>();
+        try (Statement st = connection.createStatement();
+             ResultSet rs = st.executeQuery("SELECT uuid, balance FROM coins")) {
+            int count = 0;
+            while (rs.next()) {
+                try {
+                    UUID uuid = UUID.fromString(rs.getString("uuid"));
+                    double balance = rs.getDouble("balance");
+                    balances.put(uuid, balance);
+                    count++;
+                } catch (IllegalArgumentException ex) {
+                    logger.warning("[MySQL] ⚠️ Błędny UUID w bazie: " + rs.getString("uuid"));
+                }
+            }
+            logger.info("[MySQL] 📊 Załadowano wszystkie salda (" + count + " graczy).");
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "[MySQL] ❌ Błąd podczas pobierania wszystkich balansów!", e);
+        }
+        return balances;
     }
 
     @Override

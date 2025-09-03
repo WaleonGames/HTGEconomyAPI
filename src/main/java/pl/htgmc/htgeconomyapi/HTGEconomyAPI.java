@@ -12,6 +12,7 @@ import pl.htgmc.htgeconomyapi.commands.CoinsCommand;
 import pl.htgmc.htgeconomyapi.commands.DynamicStatsCommand;
 import pl.htgmc.htgeconomyapi.commands.TransferCommand;
 import pl.htgmc.htgeconomyapi.config.CurrencyConfig;
+import pl.htgmc.htgeconomyapi.data.CoinStorage;
 import pl.htgmc.htgeconomyapi.database.DatabaseManager;
 import pl.htgmc.htgeconomyapi.database.MySQLDatabase;
 import pl.htgmc.htgeconomyapi.database.SQLiteDatabase;
@@ -100,6 +101,19 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
         database.connect();
 
+        // === WCZYTYWANIE SALD GRACZY ===
+        CoinStorage.load(
+                getDataFolder(),
+                !storageType.equalsIgnoreCase("yaml"), // jeśli nie YAML, to DB
+                storageType,
+                getConfig().getString("mysql.host"),
+                getConfig().getInt("mysql.port"),
+                getConfig().getString("mysql.database"),
+                getConfig().getString("mysql.username"),
+                getConfig().getString("mysql.password")
+        );
+        getLogger().info("CoinStorage został pomyślnie załadowany.");
+
         // === WCZYTYWANIE INNYCH KONFIGURACJI ===
         CurrencyConfig.load(getDataFolder());
         EconomyStatsSender.loadHistory();
@@ -170,6 +184,9 @@ public final class HTGEconomyAPI extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        // Zapisz/YAML i zamknij DB
+        CoinStorage.shutdown();
+
         if (database != null) database.disconnect();
         getLogger().info("Baza danych zamknięta przed wyłączeniem.");
     }
