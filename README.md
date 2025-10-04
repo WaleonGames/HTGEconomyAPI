@@ -111,7 +111,6 @@ Dane aktualizują się tylko przy zmianach — brak spamu.
 
 ## 📌 Przyszłe funkcje
 
-- Sezonowe bonusy (Złoty Tydzień, Tani Tydzień)
 - Rozszerzone raporty ekonomiczne
 - Lepsza integracja z bazami danych (np. PostgreSQL)
 
